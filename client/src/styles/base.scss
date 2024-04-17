@@ -1,0 +1,95 @@
+/* 暗色主题 */
+html[data-theme="dark"] {
+    --text-color1: #fff;
+    --text-color2: #333;
+    --bg1: #102128;
+    --bg2: #2d5567;
+}
+
+/* 默认亮色主题 */
+:root {
+    --text-color1: #333;
+    --text-color2: #fff;
+    --text-color3: #909090;
+    --bg1: #fff;
+    --bg2: #f5f5f5;
+    --bg3: #f9f9f9;
+    --bg4: #f1f1f1;
+    --bg5: #EBF2FF;
+    --primary-100: #44E1E1;
+    --primary-200: #32F0D3;
+    --primary-300: #8fc6fd;
+    --primary-400: #c3dffa;
+    --primary-500: #d7ebfd;
+    --primary-600: #aeb0b2;
+    --primary-700: #f7f7f9;
+    --border1: #fff;
+    --border2: #559EFF;
+    --warning1: #cf4444;
+}
+
+
+
+body,
+ul,
+h1,
+h3,
+h4,
+p,
+dl,
+dd {
+    padding: 0;
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+    color: #333;
+    outline: none;
+    text-decoration: none;
+    transition: 0.4s;
+}
+
+textarea {
+    border: none;
+    outline: none;
+}
+
+button {
+    border: none;
+    outline: none;
+}
+
+i {
+    font-style: normal;
+}
+
+
+input[type='text'],
+input[type='search'],
+input[type='password'],
+input[type='checkbox'] {
+    padding: 0;
+    outline: none;
+    border: none;
+    -webkit-appearance: none;
+
+    &::placeholder {
+        color: #ccc;
+    }
+}
+
+img {
+    max-width: 100%;
+    max-height: 100%;
+    vertical-align: middle;
+    // background: #ebebeb url('@/assets/images/200.png') no-repeat center / contain;
+}
+
+ul {
+    list-style: none;
+}
+
+li {
+    list-style-type: none;
+}
