@@ -42,7 +42,6 @@ export const useUserStore = defineStore('user', () => {
     const login = async ({ username, password }: { username: string, password: any }) => {
         try {
             if (userState.isLogin === true) {
-                // already login
                 alreadyLoginMsg()   //提示已经登录
             } else {
                 const res = await userLogin(username, password)
@@ -50,12 +49,12 @@ export const useUserStore = defineStore('user', () => {
                     loginSuccessMsg()   //提示登录成功
                     // userState.token = res.data.token
                     userState.isLogin = true
-                    // userInfo.value = res.data.userInfo
+                    userInfo.value = res.data
                     // console.log("1", userInfo.value);
                     // localstorage存储登录状态
                     localStorage.setItem('isLogin', 'true')
                     // localStorage.setItem('token', res.data.token)
-                    // localStorage.setItem('userInfo', JSON.stringify(userInfo.value))
+                    localStorage.setItem('userInfo', JSON.stringify(userInfo.value))
                     // 登录成功后，跳转到seg面
                     router.push('/seg')
                 } else if (res.code == 400) {
@@ -63,7 +62,7 @@ export const useUserStore = defineStore('user', () => {
                         userNotFoundMsg()   //提示用户不存在
                     } else if (res.msg == 'password error') {
                         errorPsw()   //提示密码有误
-                    }else{
+                    } else {
                         errorMsg()  //提示登录有误
                     }
                 } else {
@@ -85,18 +84,18 @@ export const useUserStore = defineStore('user', () => {
         userInfo.value = {}
         localStorage.removeItem('isLogin')
         // localStorage.removeItem('token')
-        // localStorage.removeItem('userInfo')
+        localStorage.removeItem('userInfo')
     }
 
     // 刷新页面时，从localstorage中获取登录状态
     const isUserLogin = () => {
         const isLogin = localStorage.getItem('isLogin')
         // const token = localStorage.getItem('token')
-        // const userInfo = localStorage.getItem('userInfo')
+        const userInfo = localStorage.getItem('userInfo')
         if (isLogin) {
             userState.isLogin = true
             // userState.token = token || ''
-            // userInfo.value = userInfo ? JSON.parse(userInfo) : {}
+            userInfo.value = userInfo ? JSON.parse(userInfo) : {}
             // userInfo.value = userInfo ? JSON.parse(userInfo) : {}
         } else {
             userState.isLogin = false
@@ -120,7 +119,7 @@ export const useUserStore = defineStore('user', () => {
         userInfo.value = {}
         localStorage.removeItem('isLogin')
         // localStorage.removeItem('token')
-        // localStorage.removeItem('userInfo')
+        localStorage.removeItem('userInfo')
     }
 
     return {

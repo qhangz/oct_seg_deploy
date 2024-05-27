@@ -1,4 +1,3 @@
-
 import torch
 import torch.nn as nn
 import torch.optim
@@ -10,9 +9,11 @@ from model.models.stack_unet import Stack_UNet
 from model.bin.my_transforms import get_transforms
 from collections import OrderedDict
 import os
+import time
 
 import cv2
 import numpy as np
+
 
 class Options:
     def __init__(self):
@@ -54,19 +55,25 @@ class Options:
             # np.load('{:s}/mean_std.npy'.format(self.train['data_dir']))
         }
 
+
 def seg(img_content):
-    print('seg begins.')
+    # print('seg begins.')
+    start_time = time.time()
+
     img = img_content
 
     # 进行图像分割
     segmented_img = seg_generation(img)
 
     # 对分割后的图像进行标注
-    result_img=mask_generation(img,segmented_img)
-    print('Segmentation and masking completed.')
+    result_img = mask_generation(img, segmented_img)
+
+    end_time = time.time()
+    # print('Segmentation and masking completed.')
+    # print('共用时 %.2f 秒' % (end_time - start_time))
 
     # 将处理好的图像转换为字节流并返回
-    return result_img
+    return result_img, (end_time - start_time)
 
 
 def seg_generation(img_content):
@@ -86,31 +93,31 @@ def seg_generation(img_content):
     # model = model.cpu()
 
     # ----- load trained model ----- #
-    print("=> loading trained model")
-    print(os.getcwd())
-    print(model_path)
+    # print("=> loading trained model")
+    # print(os.getcwd())
+    # print(model_path)
     best_checkpoint = torch.load(model_path, map_location=torch.device('cpu'))
     model.load_state_dict(best_checkpoint['state_dict'])
 
     # switch to evaluate mode
     model.eval()
-    print("=> Seg begins:")
+    # print("=> Seg begins:")
 
     input = test_transform((img,))[0].unsqueeze(0).cpu()
 
-    print('\tComputing output probability maps...')
+    # print('\tComputing output probability maps...')
     prob1_maps, prob2_maps = get_probmaps(input, model)
 
     pred2 = (prob2_maps > 0.5)
     final_pred = Image.fromarray((pred2 * 255).astype(np.uint8))
 
-    print('Finish segmentation.')
+    # print('Finish segmentation.')
 
     return final_pred
 
 
-def mask_generation(origin_img,segmented_img):
-    print('Masking begins.')
+def mask_generation(origin_img, segmented_img):
+    # print('Masking begins.')
     # 处理原始图像
     origin_img = cv2.cvtColor(np.array(origin_img), cv2.COLOR_RGB2BGR)
 
@@ -130,12 +137,13 @@ def mask_generation(origin_img,segmented_img):
     contour_img = origin_img.copy()
     cv2.drawContours(contour_img, contours, -1, (0, 255, 0), 2)
 
-    print('Finish masking.')
+    # print('Finish masking.')
     # 将处理好的图像转换为字节流并返回
     _, buffer = cv2.imencode('.png', contour_img)
     contour_img_bytes = buffer.tobytes()
 
     return contour_img_bytes
+
 
 def get_probmaps(input, model):
     with torch.no_grad():
@@ -143,5 +151,3 @@ def get_probmaps(input, model):
     prob1_maps = output1.squeeze().sigmoid().cpu().numpy()
     prob2_maps = output2.squeeze().sigmoid().cpu().numpy()
     return prob1_maps, prob2_maps
-
-

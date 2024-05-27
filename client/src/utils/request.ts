@@ -2,8 +2,8 @@ import axios from 'axios'
 import { message } from 'ant-design-vue'
 
 const service = axios.create({
-    // baseURL: 'http://localhost:5000',
-    baseURL: 'https://api.zqhang.top',
+    baseURL: 'http://localhost:5000',
+    // baseURL: 'https://api.zqhang.top',
     timeout: 3000000,
 })
 
@@ -18,7 +18,7 @@ service.interceptors.request.use(
 service.interceptors.response.use(
     (res) => {
         const body = res.data
-        console.log('请求返回', body)
+        // console.log('请求返回', body)
         if (body.code !== 0) {
             return body
         } else {

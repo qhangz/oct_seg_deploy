@@ -1,31 +1,23 @@
 <script setup lang="ts">
 import { message } from 'ant-design-vue'
-import { uploadImage, getImage, clearImage } from '@/api/images'
+import { uploadImage, getImage } from '@/api/images'
 import { ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore';
+import { useTimingStore } from '@/stores/timing';
 
 const route = useRoute()
+const router = useRouter()
 const sourceImg = ref('')
 const resultImg = ref('')
 const imageID = ref('')
 const isScanning = ref(false)
 const isEnlarge = ref(false)
 const isDetecting = ref(false)
+let userId = localStorage.getItem('userInfo') ? JSON.parse(localStorage.getItem('userInfo')!).user_id : ''
+const timing = useTimingStore()
+const isTiming = ref(false)
 
-// 向后端请求获取检测结果
-const getImg = async () => {
-    console.log('imageID:', imageID.value);
-    const res = await getImage(imageID.value)
-    if (res != null) {
-        resultImg.value = window.URL.createObjectURL(res)
-        toggleScanning(false)
-        enlarge()
-        isDetecting.value = false
-    } else {
-        console.log('no res');
-    }
-}
 // 进行检测按钮事件
 const detect = () => {
     if (imageID.value === '') {
@@ -40,12 +32,34 @@ const detect = () => {
         getImg()
     }
 }
+// 向后端请求获取检测结果
+const getImg = async () => {
+    timing.resetTimer()
+    isTiming.value = true
+    timing.startTimer()
+    const res = await getImage(imageID.value)
+    if (res != null) {
+        resultImg.value = window.URL.createObjectURL(res)
+        timing.pauseTimer()
+        toggleScanning(false)
+        enlarge()
+        isDetecting.value = false
+    } else {
+        console.log('no res');
+        toggleScanning(false)
+        isDetecting.value = false
+    }
+}
 
 // 退出登录
 const userStore = useUserStore()
 const logout = () => {
     userStore.logout()
     reload()
+}
+// history record
+const record = () => {
+    router.push('/record');
 }
 // reload function(refresh page)
 const reload = () => {
@@ -68,7 +82,6 @@ const handleUpload = async ({
 }: {
     target: HTMLInputElement & EventTarget
 }) => {
-    // toggleScanning(true)
     if (isDetecting.value) {
         message.error('正在检测中，请稍后再试')
         return
@@ -83,15 +96,13 @@ const handleUpload = async ({
             }
 
             const formData = new FormData()
-            formData.set('file', files[0])
+            formData.append('file', files[0])
+            formData.append('user_id', userId)
+            isTiming.value = false
             try {
                 const res = await uploadImage(formData)
-                // console.log('res:', res);
                 imageID.value = res.data.image_id
-                // console.log('imageID:', imageID.value);
-                // toggleScanning(false)
             } catch {
-                // toggleScanning(false)
                 message.error('上传失败')
             }
             target.value = ''
@@ -128,6 +139,9 @@ watch(
                     <div class="logout" @click="logout">
                         退出登录
                     </div>
+                    <div class="record" @click="record">
+                        历史记录
+                    </div>
                 </div>
 
             </div>
@@ -136,6 +150,10 @@ watch(
             <p class="img-tip">
                 说明：图片处理功能，需要上传一张图片，然后点击检测按钮，等待结果检出；若重复检测相同图片，则直接显示上次检测结果。
             </p>
+
+            <div v-if="isTiming" class="timing">
+                检测时间：{{ timing.second }} : {{ timing.millisecond }}
+            </div>
 
             <div class="image-box" style="display: flex">
                 <div class="img-input" :style="{ backgroundImage: `url(${sourceImg})` }">
@@ -167,15 +185,11 @@ watch(
 <style lang="scss" scoped>
 .home {
     display: flex;
-    // justify-content: center;
     align-items: center;
     flex-direction: column;
-    background: linear-gradient(to right top, #DDDDDD, #FFFFFF);
+    // background: linear-gradient(to right top, #DDDDDD, #FFFFFF);
     background: linear-gradient(to right top, #dbf1fa, #f8fcff);
-    //     linear-gradient(to right top, #DDDDDD, #FFFFFF),
-    //     linear-gradient(to right, #DDDDDD, #FFFFFF);
     background-blend-mode: multiply;
-    /* 叠加两个渐变效果 */
     color: var(--text-color1);
     min-height: calc(100vh);
     overflow: hidden;
@@ -218,31 +232,54 @@ watch(
                 width: 60px;
                 background: url('@/assets/images/avatar.png') no-repeat center 0px / contain;
                 position: relative;
-            }
 
-            .logout {
-                font-size: 16px;
-                cursor: pointer;
-                display: none;
-                width: 90px;
-                height: 34px;
-                background-color: var(---bg1);
-                z-index: 1;
-                border-radius: 5px;
-                position: absolute;
-                top: 90%;
-                left: 50%;
-                transform: translateX(-50%);
-                text-align: center;
-                line-height: 34px;
-                border: 1px solid var(--warning1);
+                .logout {
+                    font-size: 16px;
+                    cursor: pointer;
+                    display: none;
+                    width: 90px;
+                    height: 34px;
+                    background-color: var(---bg1);
+                    z-index: 1;
+                    border-radius: 5px;
+                    position: absolute;
+                    top: 149%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    text-align: center;
+                    line-height: 34px;
+                    border: 1px solid var(--warning1);
+                }
+
+                .record {
+                    font-size: 16px;
+                    cursor: pointer;
+                    display: none;
+                    width: 90px;
+                    height: 34px;
+                    background-color: var(---bg1);
+                    z-index: 1;
+                    border-radius: 5px;
+                    position: absolute;
+                    top: 90%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    text-align: center;
+                    line-height: 34px;
+                    border: 1px solid var(--border2);
+                }
             }
 
             .avatar:hover .logout {
                 display: flex;
                 justify-content: center;
                 align-items: center;
+            }
 
+            .avatar:hover .record {
+                display: flex;
+                justify-content: center;
+                align-items: center;
             }
         }
     }
@@ -250,17 +287,23 @@ watch(
     .photo {
         width: 1040px;
 
-        // height: 100%;
-        // margin-top:30px;
         .img-tip {
             font-size: 16px;
             color: var(--text-color1);
-            margin: 0px 0px 20px 20px;
+            margin: 0px 0px 10px 20px;
+        }
+
+        .timing {
+            font-size: 16px;
+            color: var(--text-color1);
+            position: fixed;
+            left: 45.5%;
         }
 
         .image-box {
             overflow: hidden;
             position: relative;
+            margin-top: 38px;
 
             .img {
                 &-input {
@@ -342,7 +385,7 @@ watch(
             justify-content: center;
             align-items: center;
             gap: 250px;
-            margin-top: 30px;
+            margin-top: 25px;
 
             .button {
                 font-size: 14px;
@@ -350,7 +393,6 @@ watch(
                 height: 40px;
                 border-radius: 4px;
                 color: var(--text-color2);
-                // padding-left:30px;
                 cursor: pointer;
                 letter-spacing: 5px;
                 font-size: 16px;
@@ -363,9 +405,7 @@ watch(
                 position: relative;
                 display: inline-block;
                 padding: 10px 20px;
-                /* 按钮内边距 */
                 background-color: #177ddc;
-                // background: url('@/assets/images/add.png') no-repeat center 0px / contain;
                 cursor: pointer;
             }
 

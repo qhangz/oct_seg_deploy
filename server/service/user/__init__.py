@@ -29,7 +29,8 @@ def register(app: flask.Flask, data_db: sqlite3.Connection):
         if result is None:
             return utils.Resp(400, None, 'user not found').to_json()
         if str(result[2]).strip() == password.strip():
-            return utils.Resp(200, None, 'login successfully').to_json()
+            id = result[0]
+            return utils.Resp(200, {'user_id': id}, 'login successfully').to_json()
         else:
             return utils.Resp(400, None, 'password error').to_json()
 

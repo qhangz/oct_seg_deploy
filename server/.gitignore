@@ -1,1 +1,3 @@
 /model/checkpoint_best.pth.tar
+.idea
+__pycache__

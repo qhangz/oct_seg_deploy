@@ -11,7 +11,7 @@ export function uploadImage(data: FormData) {
     })
 }
 
-export function getImage(image_id: string){
+export function getImage(image_id: string) {
     return request({
         url: `/api/getimg/${image_id}`,
         method: 'GET',
@@ -19,10 +19,17 @@ export function getImage(image_id: string){
     })
 }
 
+export function getRecord(user_id:string){
+    return request({
+        url: `/api/getrecord/${user_id}`,
+        method: 'GET',
+    })
+}
+
 
 export function clearImage() {
     return request({
-        url: `/image`,
+        url: `/api/image/delete`,
         method: 'DELETE',
     })
 }

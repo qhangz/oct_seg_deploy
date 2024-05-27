@@ -40,6 +40,11 @@ const router = createRouter({
       meta: {
         title: 'page not found'
       },
+    },
+    {
+      path: '/record',
+      name: 'record',
+      component: () => import('../views/record/index.vue'),
     }
   ]
 })

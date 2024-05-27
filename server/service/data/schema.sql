@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS imgdata (
     inputimg TEXT NOT NULL,
     outputimg TEXT NULL,
     contours TEXT NULL,
+    upload_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    seg_time TEXT NULL,
     user_id INTEGER,
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
