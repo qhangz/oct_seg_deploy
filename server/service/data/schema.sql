@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username STRING NOT NULL,
-    password STRING NOT NULL,
-    email STRING NOT NULL
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
+    email TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS imgdata (

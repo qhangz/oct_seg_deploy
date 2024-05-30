@@ -2,8 +2,8 @@ import axios from 'axios'
 import { message } from 'ant-design-vue'
 
 const service = axios.create({
-    baseURL: 'http://localhost:5000',
-    // baseURL: 'https://api.zqhang.top',
+    // baseURL: 'http://localhost:5000',
+    baseURL: 'https://api.zqhang.top',
     timeout: 3000000,
 })
 
