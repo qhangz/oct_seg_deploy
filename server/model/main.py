@@ -79,7 +79,8 @@ def seg(img_content):
 def seg_generation(img_content):
     # 将字节流转换为PIL.Image对象
     # img = Image.open(io.BytesIO(img_content))
-    img = img_content
+    img = img_content.convert('L')  # 转换为灰度图像
+    # img = img_content
     opt = Options()
 
     model_path = './model/checkpoint_best.pth.tar'
